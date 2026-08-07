@@ -1,0 +1,40 @@
+body {
+    background-color: lightblue;
+}
+
+.container {
+    background-color: lightgreen;
+    width: 400px;
+    padding: 20px;
+    height: 400px;
+}
+
+h1 {
+    color:black;
+    bold: true;
+    
+}
+
+p {
+    font-family: Poppins;
+    font-size: 30px;
+}
+
+label {
+    font-size: 20px;
+}
+
+input {
+    font-size: 18px;
+    padding: 8px;
+}
+
+button {
+    background-color: red;
+    color: white;
+    font-size: 20px;
+    padding: 10px ;
+}
+button:hover {
+    background-color: #1557b0;
+}
