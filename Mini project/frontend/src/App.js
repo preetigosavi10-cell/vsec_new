@@ -1,83 +1,273 @@
- import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  const [task, setTask] = useState("");
-  const [tasks, setTasks] = useState([]);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  // Get tasks from MongoDB
-  function getTasks() {
-    fetch("http://localhost:3000/tasks")
-      .then((res) => res.json())
-      .then((data) => setTasks(data))
-      .catch(() => alert("Cannot connect to backend"));
-  }
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [department, setDepartment] = useState("");
+  const [event, setEvent] = useState("Workshop");
+  const [date, setDate] = useState("");
+  const [registrations, setRegistrations] = useState([]);
+  const [editId, setEditId] = useState(null);
+  const [message, setMessage] = useState("");
+
+  const url = "http://localhost:5000/registrations";
+
+  const login = (e) => {
+    e.preventDefault();
+    setLoggedIn(true);
+  };
+
+  const getRegistrations = async () => {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setRegistrations(data);
+    } catch (error) {
+      setMessage("Cannot connect to backend. Start the server first.");
+    }
+  };
 
   useEffect(() => {
-    getTasks();
-  }, []);
+    if (loggedIn) {
+      getRegistrations();
+    }
+  }, [loggedIn]);
 
-  // Add task
-  function addTask() {
-    if (task.trim() === "") {
-      alert("Please enter a task");
+  const saveRegistration = async (e) => {
+    e.preventDefault();
+
+    const registration = {
+      name: name,
+      email: email,
+      department: department,
+      event: event,
+      date: date
+    };
+
+    try {
+      let response;
+
+      if (editId) {
+        response = await fetch(url + "/" + editId, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(registration)
+        });
+      } else {
+        response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(registration)
+        });
+      }
+
+      if (!response.ok) {
+        setMessage("Could not save registration.");
+        return;
+      }
+
+      setMessage(editId ? "Registration updated!" : "Registration added!");
+      clearForm();
+      getRegistrations();
+    } catch (error) {
+      setMessage("Backend is not responding.");
+    }
+  };
+
+  const editRegistration = (registration) => {
+    setName(registration.name);
+    setEmail(registration.email);
+    setDepartment(registration.department);
+    setEvent(registration.event);
+    setDate(registration.date || "");
+    setEditId(registration._id);
+    setMessage("");
+  };
+
+  const deleteRegistration = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this registration?")) {
       return;
     }
 
-    fetch("http://localhost:3000/tasks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ title: task })
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to add task");
-        }
-        setTask("");
-        getTasks();
-      })
-      .catch(() => alert("Error adding task"));
-  }
+    try {
+      const response = await fetch(url + "/" + id, {
+        method: "DELETE"
+      });
 
-  // Delete task
-  function deleteTask(id) {
-    fetch("http://localhost:3000/tasks/" + id, {
-      method: "DELETE"
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to delete task");
-        }
-        getTasks();
-      })
-      .catch(() => alert("Error deleting task"));
+      if (!response.ok) {
+        setMessage("Could not delete registration.");
+        return;
+      }
+
+      setMessage("Registration deleted!");
+      getRegistrations();
+    } catch (error) {
+      setMessage("Backend is not responding.");
+    }
+  };
+
+  const clearForm = () => {
+    setName("");
+    setEmail("");
+    setDepartment("");
+    setEvent("Workshop");
+    setDate("");
+    setEditId(null);
+  };
+
+  if (!loggedIn) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <h1>EventEase</h1>
+          <p>Event Registration System</p>
+
+          <form onSubmit={login}>
+            <label>Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
+              required
+            />
+
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              required
+            />
+
+            <button type="submit">Login</button>
+          </form>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>My To-Do List</h1>
+    <div className="app">
+      <header className="header">
+        <h1>EventEase</h1>
+        <p>Register for campus events</p>
 
-      <input
-        type="text"
-        placeholder="Enter a task"
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
-      />
+        <button
+          onClick={() => {
+            setLoggedIn(false);
+            setUsername("");
+            setPassword("");
+            setMessage("");
+            clearForm();
+          }}
+        >
+          Logout
+        </button>
+      </header>
 
-      <button onClick={addTask}>Add Task</button>
+      <main className="container">
+        <section className="form-card">
+          <h2>{editId ? "Edit Registration" : "Register for an Event"}</h2>
 
-      <ul>
-        {tasks.map((item) => (
-          <li key={item._id}>
-            {item.title}
-            <button onClick={() => deleteTask(item._id)}>
-              Delete
+          <form onSubmit={saveRegistration}>
+            <label>Student Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              required
+            />
+
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter email"
+              required
+            />
+
+            <label>Department</label>
+            <input
+              type="text"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="Enter department"
+              required
+            />
+
+            <label>Event</label>
+            <select
+              value={event}
+              onChange={(e) => setEvent(e.target.value)}
+            >
+              <option>Workshop</option>
+              <option>Hackathon</option>
+              <option>Coding Competition</option>
+              <option>Technical Seminar</option>
+              <option>Cultural Fest</option>
+            </select>
+
+            <label>Event Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+            />
+
+            <button type="submit">
+              {editId ? "Update Registration" : "Register"}
             </button>
-          </li>
-        ))}
-      </ul>
+
+            {editId && (
+              <button type="button" onClick={clearForm}>
+                Cancel
+              </button>
+            )}
+          </form>
+
+          {message && <p className="message">{message}</p>}
+        </section>
+
+        <section className="registration-card">
+          <h2>All Registrations</h2>
+          <p>Total registrations: {registrations.length}</p>
+
+          {registrations.length === 0 ? (
+            <p>No registrations yet.</p>
+          ) : (
+            registrations.map((registration) => (
+              <div className="registration-item" key={registration._id}>
+                <h3>{registration.name}</h3>
+                <p>Email: {registration.email}</p>
+                <p>Department: {registration.department}</p>
+                <p>Event: {registration.event}</p>
+                <p>Date: {registration.date}</p>
+
+                <button onClick={() => editRegistration(registration)}>
+                  Edit
+                </button>
+
+                <button
+                  className="delete-btn"
+                  onClick={() => deleteRegistration(registration._id)}
+                >
+                  Delete
+                </button>
+              </div>
+            ))
+          )}
+        </section>
+      </main>
     </div>
   );
 }

@@ -1,50 +1,70 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
   margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
 }
 
-div {
+.login-page {
   text-align: center;
+  margin-top: 100px;
 }
 
-h1 {
-  color: #173b70;
-  margin-top: 50px;
+.login-card {
+  background-color: white;
+  width: 300px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ccc;
 }
 
-input {
-  padding: 12px;
-  width: 250px;
-  border: 1px solid #aaa;
-  border-radius: 6px;
-  font-size: 16px;
+.header {
+  background-color: lightblue;
+  text-align: center;
+  padding: 15px;
+}
+
+.container {
+  width: 80%;
+  margin: 20px auto;
+}
+
+.form-card,
+.registration-card {
+  background-color: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input,
+select {
+  padding: 8px;
 }
 
 button {
-  padding: 12px 16px;
-  margin: 8px;
-  background-color: #2563eb;
+  padding: 8px;
+  background-color: blue;
   color: white;
   border: none;
-  border-radius: 6px;
   cursor: pointer;
 }
 
-button:hover {
-  background-color: #173b70;
+.registration-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+.delete-btn {
+  background-color: red;
 }
 
-li {
-  background-color: white;
-  padding: 12px;
-  margin: 10px auto;
-  width: 350px;
-  border-radius: 6px;
-  
+.message {
+  color: green;
 }
